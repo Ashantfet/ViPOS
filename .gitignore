@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.pyc
+
+# Editors / notebooks
+.vscode/
+.ipynb_checkpoints/
+
+# Logs / outputs
+logs/
+outputs/
+runs/
+checkpoints/
+
+# Large data / models (don't commit raw datasets)
+data/
+*.mp4
+*.avi
+*.blend
+*.zip
+*.tar.gz
+
+# Model weights - track via LFS if needed
+*.pth
+*.pt
+*.ckpt
+*.h5
+*.onnx
+
+# Common OS / misc
+.DS_Store
+
+# Images, annotations and lightweight data (ignored per request)
+*.png
+*.PNG
+*.jpg
+*.jpeg
+*.JPG
+*.JPEG
+
+# Tabular / metadata (ignored per request)
+*.csv
+*.CSV
+*.json
+*.JSON
+*.txt
+*.TXT
+
+# Logs and outputs
+*.log
+*.out
+
+# Docs (if you want to keep pdfs local, remove these lines)
+*.pdf
+
