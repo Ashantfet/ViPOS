@@ -38,8 +38,8 @@ def main():
     train_subset = Subset(train_dataset, train_indices)
     val_subset = Subset(val_dataset, val_indices)
     # 🧩 --- LIMIT TRAINING TO 1000 IMAGES ---
-    MAX_TRAIN_SAMPLES = 1000
-    MAX_VAL_SAMPLES = 200
+    MAX_TRAIN_SAMPLES = 6000
+    MAX_VAL_SAMPLES = 4000
     train_subset = Subset(train_subset, range(min(MAX_TRAIN_SAMPLES, len(train_subset))))
     val_subset = Subset(val_subset, range(min(MAX_VAL_SAMPLES, len(val_subset))))
     # ---------------------------------------

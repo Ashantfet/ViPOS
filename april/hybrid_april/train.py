@@ -32,11 +32,36 @@ def train_model(model, train_loader, val_loader, total_epochs, output_dir,
     device = config.DEVICE
 
     criterion = nn.CrossEntropyLoss(label_smoothing=getattr(config, "LABEL_SMOOTHING", 0.0))
-    optimizer = optim.AdamW(model.parameters(), lr=config.LEARNING_RATE, weight_decay=1e-4)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-        optimizer, mode="min", factor=config.SCHEDULER_FACTOR,
-        patience=config.SCHEDULER_PATIENCE, min_lr=config.SCHEDULER_MIN_LR
+    # optimizer = optim.AdamW(model.parameters(), lr=config.LEARNING_RATE, weight_decay=1e-4)
+    # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+    #     optimizer, mode="min", factor=config.SCHEDULER_FACTOR,
+    #     patience=config.SCHEDULER_PATIENCE, min_lr=config.SCHEDULER_MIN_LR
+    # )
+
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr=config.LEARNING_RATE,
+        weight_decay=config.WEIGHT_DECAY
     )
+
+    # --- Scheduler setup ---
+    if getattr(config, "SCHEDULER_TYPE", "cosine") == "cosine":
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=total_epochs, eta_min=config.SCHEDULER_MIN_LR
+        )
+    else:
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode="min", factor=config.SCHEDULER_FACTOR,
+            patience=config.SCHEDULER_PATIENCE, min_lr=config.SCHEDULER_MIN_LR
+        )
+        # Optional: Warmup scheduler for first few epochs
+    def warmup_lr_lambda(current_epoch):
+        warmup_epochs = getattr(config, "WARMUP_EPOCHS", 0)
+        if current_epoch < warmup_epochs:
+            return float(current_epoch + 1) / max(1, warmup_epochs)
+        return 1.0
+    
+    warmup_scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=warmup_lr_lambda)
 
     # Prepare CSV logging
     csv_path = os.path.join(output_dir, "epoch_metrics.csv")
@@ -137,7 +162,16 @@ def train_model(model, train_loader, val_loader, total_epochs, output_dir,
             writer.writerow(row)
 
         # ------------------ Scheduler & Checkpoint ------------------
-        scheduler.step(avg_val_loss)
+        # scheduler.step(avg_val_loss)
+        # Step learning rate schedulers properly
+        if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+            scheduler.step(avg_val_loss)
+        else:
+            scheduler.step()
+
+        # Apply warmup for first few epochs
+        if epoch < getattr(config, "WARMUP_EPOCHS", 0):
+            warmup_scheduler.step()
 
         if avg_val_loss < best_val_loss:
             best_val_loss = avg_val_loss

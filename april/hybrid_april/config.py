@@ -21,16 +21,46 @@ EPOCHS_TO_TRAIN_NOW = 1
 TOTAL_EPOCHS = PREVIOUS_COMPLETED_EPOCHS + EPOCHS_TO_TRAIN_NOW
 CHECKPOINT_INTERVAL = 5
 
-# --- Hyperparameters ---
+# # --- Hyperparameters ---
+# BATCH_SIZE = 16
+# LEARNING_RATE = 1e-4   # smaller, avoids divergence with transformers
+# UNFREEZE_EPOCH = 2
+# FINE_TUNE_LR_FACTOR = 0.1
+
+# # --- Scheduler ---
+# SCHEDULER_PATIENCE = 5
+# SCHEDULER_FACTOR = 0.5
+# SCHEDULER_MIN_LR = 1e-6
+
+##############################################################
+# === Training Hyperparameters (Transformer Optimized) ===
+##############################################################
+
+# --- Core ---
 BATCH_SIZE = 16
-LEARNING_RATE = 1e-4   # smaller, avoids divergence with transformers
+LEARNING_RATE = 3e-4        # slightly higher for AdamW + cosine schedule
+WEIGHT_DECAY = 1e-4         # helps prevent overfitting
+
+# --- Fine-tuning Control ---
 UNFREEZE_EPOCH = 2
 FINE_TUNE_LR_FACTOR = 0.1
 
+# --- Training Epochs ---
+WARMUP_EPOCHS = 5           # LR warmup epochs for transformer stability
+EPOCHS_TO_TRAIN_NOW = 1    # train longer (transformers converge slowly)
+
 # --- Scheduler ---
+# Options: "cosine" or "plateau"
+SCHEDULER_TYPE = "cosine"
 SCHEDULER_PATIENCE = 5
 SCHEDULER_FACTOR = 0.5
 SCHEDULER_MIN_LR = 1e-6
+
+# --- Label smoothing & regularization ---
+LABEL_SMOOTHING = 0.1
+DROPOUT = 0.3
+
+##############################################################
 
 # --- Classification ---
 NUM_BINS = 100  ##try with 200,500,50
